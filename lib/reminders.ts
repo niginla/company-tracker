@@ -2,9 +2,8 @@ import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import type { Company } from '@/types/company'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function sendWeeklyDigest() {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
 
