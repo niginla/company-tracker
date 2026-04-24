@@ -70,9 +70,16 @@ export default async function DashboardPage() {
     .neq('status', 'Archived')
     .order('next_review_date', { ascending: true, nullsFirst: false })
 
-  const overdue = (companies as Company[]).filter(isOverdue)
-  const dueSoon = (companies as Company[]).filter(isDueSoon)
-  const inbox = (companies as Company[]).filter(c => c.status === 'Inbox' && !isOverdue(c) && !isDueSoon(c))
+  const all = companies as Company[]
+  const overdue = all.filter(isOverdue)
+  const dueSoon = all.filter(isDueSoon)
+  const inbox = all.filter(c => c.status === 'Inbox' && !isOverdue(c) && !isDueSoon(c))
+  const active = all.filter(c => c.status === 'Active' && !isOverdue(c) && !isDueSoon(c))
+  const nearTerm = all.filter(c => c.status === 'Monitor - Near Term' && !isOverdue(c) && !isDueSoon(c))
+  const longerTerm = all.filter(c => c.status === 'Monitor - Longer Term' && !isOverdue(c) && !isDueSoon(c))
+
+  const empty = overdue.length === 0 && dueSoon.length === 0 && inbox.length === 0 &&
+    active.length === 0 && nearTerm.length === 0 && longerTerm.length === 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -114,9 +121,45 @@ export default async function DashboardPage() {
           </section>
         )}
 
-        {overdue.length === 0 && dueSoon.length === 0 && inbox.length === 0 && (
+        {/* Active */}
+        {active.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">
+              Active ({active.length})
+            </h2>
+            <div className="bg-white rounded-lg border border-blue-200 divide-y divide-gray-100 overflow-hidden">
+              {active.map(c => <CompanyRow key={c.id} company={c} />)}
+            </div>
+          </section>
+        )}
+
+        {/* Monitor - Near Term */}
+        {nearTerm.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold text-yellow-600 uppercase tracking-wide mb-2">
+              Monitor – Near Term ({nearTerm.length})
+            </h2>
+            <div className="bg-white rounded-lg border border-yellow-200 divide-y divide-gray-100 overflow-hidden">
+              {nearTerm.map(c => <CompanyRow key={c.id} company={c} />)}
+            </div>
+          </section>
+        )}
+
+        {/* Monitor - Longer Term */}
+        {longerTerm.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-2">
+              Monitor – Longer Term ({longerTerm.length})
+            </h2>
+            <div className="bg-white rounded-lg border border-orange-200 divide-y divide-gray-100 overflow-hidden">
+              {longerTerm.map(c => <CompanyRow key={c.id} company={c} />)}
+            </div>
+          </section>
+        )}
+
+        {empty && (
           <div className="text-center py-16 text-gray-400 text-sm">
-            Nothing needs attention right now.{' '}
+            Nothing here yet.{' '}
             <Link href="/companies/new" className="text-gray-900 underline">Add a company</Link>
           </div>
         )}
