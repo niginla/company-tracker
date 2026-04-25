@@ -105,7 +105,7 @@ function companyBlock(c: Company, bg: string, border: string): string {
       <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #6b7280;">
         <tr>
           ${c.owner ? `<td style="padding: 2px 12px 2px 0;"><strong style="color: #374151;">Owner</strong><br>${esc(c.owner)}</td>` : ''}
-          ${c.introduced_by ? `<td style="padding: 2px 12px 2px 0;"><strong style="color: #374151;">Introduced by</strong><br>${esc(c.introduced_by)}</td>` : ''}
+          ${c.introduced_by ? `<td style="padding: 2px 12px 2px 0;"><strong style="color: #374151;">Banker</strong><br>${esc(c.introduced_by)}</td>` : ''}
           ${reviewDate ? `<td style="padding: 2px 0;"><strong style="color: #374151;">Next review</strong><br>${reviewDate}</td>` : ''}
         </tr>
       </table>

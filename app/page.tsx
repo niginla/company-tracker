@@ -47,7 +47,7 @@ function CompanyRow({ company }: { company: Company }) {
       <div className="flex flex-col gap-0.5 min-w-0">
         <span className="text-sm font-medium text-gray-900 truncate">{company.company_name}</span>
         {company.introduced_by && (
-          <span className="text-xs text-gray-400">via {company.introduced_by}</span>
+          <span className="text-xs text-gray-400">banker: {company.introduced_by}</span>
         )}
       </div>
       <div className="flex items-center gap-3 ml-4 shrink-0">

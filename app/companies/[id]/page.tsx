@@ -295,7 +295,7 @@ export default function CompanyDetailPage() {
                 className={inputClass}
               />
             </Field>
-            <Field label="Introduced by">
+            <Field label="Banker">
               <input
                 type="text"
                 value={form.introduced_by ?? ''}

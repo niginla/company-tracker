@@ -66,7 +66,7 @@ export default function QuickAddPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Introduced by <span className="text-red-500">*</span>
+              Banker <span className="text-red-500">*</span>
             </label>
             <input
               name="introduced_by"
