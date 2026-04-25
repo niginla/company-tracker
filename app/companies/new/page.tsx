@@ -78,6 +78,18 @@ export default function QuickAddPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sector
+            </label>
+            <input
+              name="sector"
+              type="text"
+              placeholder="e.g. Healthcare, SaaS, Manufacturing"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Next steps
             </label>
             <textarea
