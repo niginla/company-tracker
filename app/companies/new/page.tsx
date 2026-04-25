@@ -69,7 +69,7 @@ export default function QuickAddPage() {
               Banker <span className="text-red-500">*</span>
             </label>
             <input
-              name="introduced_by"
+              name="banker"
               type="text"
               required
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"

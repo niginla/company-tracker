@@ -298,8 +298,8 @@ export default function CompanyDetailPage() {
             <Field label="Banker">
               <input
                 type="text"
-                value={form.introduced_by ?? ''}
-                onChange={e => set('introduced_by', e.target.value)}
+                value={form.banker ?? ''}
+                onChange={e => set('banker', e.target.value)}
                 className={inputClass}
               />
             </Field>

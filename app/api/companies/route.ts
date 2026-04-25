@@ -28,10 +28,10 @@ export async function POST(request: Request) {
   const supabase = await createClient()
   const body = await request.json()
 
-  const { company_name, description, introduced_by, sector, next_steps } = body
+  const { company_name, description, banker, sector, next_steps } = body
 
-  if (!company_name?.trim() || !description?.trim() || !introduced_by?.trim()) {
-    return NextResponse.json({ error: 'company_name, description, and introduced_by are required' }, { status: 400 })
+  if (!company_name?.trim() || !description?.trim() || !banker?.trim()) {
+    return NextResponse.json({ error: 'company_name, description, and banker are required' }, { status: 400 })
   }
 
   const { data: company, error } = await supabase
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     .insert({
       company_name: company_name.trim(),
       description: description.trim(),
-      introduced_by: introduced_by.trim(),
+      banker: banker.trim(),
       sector: sector?.trim() || null,
       next_steps: next_steps?.trim() || null,
       status: 'Inbox',

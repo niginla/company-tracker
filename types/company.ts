@@ -12,7 +12,7 @@ export interface Company {
   revenue: string | null
   ebitda: string | null
   owner: string | null
-  introduced_by: string | null
+  banker: string | null
   next_steps: string | null
   sector: string | null
   status: Status
