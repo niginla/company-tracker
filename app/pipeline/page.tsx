@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { Company, Status } from '@/types/company'
 
-const STATUSES: Status[] = ['Inbox', 'Active', 'Monitor - Near Term', 'Monitor - Longer Term']
+const STATUSES: Status[] = ['Active', 'Monitor - Near Term', 'Monitor - Longer Term', 'Inbox']
+
+const STATUS_ORDER: Record<string, number> = {
+  'Active': 0,
+  'Monitor - Near Term': 1,
+  'Monitor - Longer Term': 2,
+  'Inbox': 3,
+}
 
 const STATUS_COLORS: Record<string, string> = {
   'Inbox': 'bg-gray-100 text-gray-700',
@@ -50,14 +57,16 @@ export default function PipelinePage() {
   }, [companies])
 
   const filtered = useMemo(() => {
-    return companies.filter(c => {
-      if (search && !c.company_name.toLowerCase().includes(search.toLowerCase())) return false
-      if (statusFilter !== 'All' && c.status !== statusFilter) return false
-      if (sectorFilter !== 'All' && c.sector !== sectorFilter) return false
-      if (overdueFilter === 'Overdue' && !isOverdue(c)) return false
-      if (overdueFilter === 'Not overdue' && isOverdue(c)) return false
-      return true
-    })
+    return companies
+      .filter(c => {
+        if (search && !c.company_name.toLowerCase().includes(search.toLowerCase())) return false
+        if (statusFilter !== 'All' && c.status !== statusFilter) return false
+        if (sectorFilter !== 'All' && c.sector !== sectorFilter) return false
+        if (overdueFilter === 'Overdue' && !isOverdue(c)) return false
+        if (overdueFilter === 'Not overdue' && isOverdue(c)) return false
+        return true
+      })
+      .sort((a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99))
   }, [companies, search, statusFilter, sectorFilter, overdueFilter])
 
   return (
