@@ -16,8 +16,9 @@ export async function sendWeeklyDigest() {
 
   const all = (companies ?? []) as Company[]
   const overdue = all.filter(c => c.next_review_date && c.next_review_date < today)
-  const active = all.filter(c => c.status === 'Active')
-  const nearTerm = all.filter(c => c.status === 'Monitor - Near Term')
+  const overdueIds = new Set(overdue.map(c => c.id))
+  const active = all.filter(c => c.status === 'Active' && !overdueIds.has(c.id))
+  const nearTerm = all.filter(c => c.status === 'Monitor - Near Term' && !overdueIds.has(c.id))
 
   if (overdue.length === 0 && active.length === 0 && nearTerm.length === 0) {
     return { skipped: true, reason: 'nothing to report' }
