@@ -36,88 +36,111 @@ export async function sendWeeklyDigest() {
   return { sent: true, overdue: overdue.length, active: active.length, nearTerm: nearTerm.length }
 }
 
-function buildEmail(
-  overdue: Company[],
-  active: Company[],
-  nearTerm: Company[],
-): string {
-  const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+function buildEmail(overdue: Company[], active: Company[], nearTerm: Company[]): string {
+  const date = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+  })
 
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #111; background: #f9f9f9; margin: 0; padding: 0;">
-  <div style="max-width: 640px; margin: 32px auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+  return `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f3f4f6">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
 
-    <div style="background: #111; padding: 20px 28px;">
-      <p style="margin: 0; color: #fff; font-size: 16px; font-weight: 600;">Company Tracker · Weekly Digest</p>
-      <p style="margin: 4px 0 0; color: #9ca3af; font-size: 13px;">${date}</p>
-    </div>
+      <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:600px;">
 
-    <div style="padding: 28px;">
+        <!-- Header -->
+        <tr>
+          <td bgcolor="#111111" style="padding:20px 28px;">
+            <p style="margin:0;color:#ffffff;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;">Company Tracker &middot; Weekly Digest</p>
+            <p style="margin:4px 0 0;color:#9ca3af;font-size:13px;font-family:Arial,sans-serif;">${date}</p>
+          </td>
+        </tr>
 
-      ${section('Overdue', overdue, '#dc2626', '#fef2f2', '#fecaca')}
-      ${section('Active', active, '#1d4ed8', '#eff6ff', '#bfdbfe')}
-      ${section('Monitor – Near Term', nearTerm, '#92400e', '#fffbeb', '#fde68a')}
+        <!-- Body -->
+        <tr>
+          <td style="padding:28px;">
 
-      <p style="margin: 24px 0 0; font-size: 12px; color: #9ca3af;">
-        You're receiving this because you set up a weekly digest in Company Tracker.
-      </p>
-    </div>
-  </div>
+            ${section('OVERDUE', overdue, '#b91c1c')}
+            ${section('ACTIVE', active, '#1d4ed8')}
+            ${section('MONITOR – NEAR TERM', nearTerm, '#92400e')}
+
+            <p style="margin:24px 0 0;font-size:12px;color:#9ca3af;font-family:Arial,sans-serif;">
+              Weekly digest from Company Tracker.
+            </p>
+
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>`
 }
 
-function section(
-  title: string,
-  companies: Company[],
-  color: string,
-  bg: string,
-  border: string,
-): string {
+function section(title: string, companies: Company[], color: string): string {
   if (companies.length === 0) return ''
 
+  const rows = companies.map(companyBlock).join(`
+    <tr><td style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-bottom:1px solid #e5e7eb;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
+  `)
+
   return `
-    <div style="margin-bottom: 28px;">
-      <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${color};">${title}</span>
-        <span style="margin-left: 8px; font-size: 12px; color: #9ca3af;">${companies.length} ${companies.length === 1 ? 'company' : 'companies'}</span>
-      </div>
-      ${companies.map(c => companyBlock(c, bg, border)).join('')}
-    </div>`
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+      <!-- Section heading -->
+      <tr>
+        <td style="padding:0 0 10px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="font-size:12px;font-weight:bold;color:${color};font-family:Arial,sans-serif;letter-spacing:0.05em;">${title}</td>
+              <td align="right" style="font-size:12px;color:#9ca3af;font-family:Arial,sans-serif;">${companies.length} ${companies.length === 1 ? 'company' : 'companies'}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <!-- Companies -->
+      <tr>
+        <td style="border:1px solid #e5e7eb;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            ${rows}
+          </table>
+        </td>
+      </tr>
+    </table>`
 }
 
-function companyBlock(c: Company, bg: string, border: string): string {
+function companyBlock(c: Company): string {
   const reviewDate = c.next_review_date
     ? new Date(c.next_review_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
 
-  const updatedAt = new Date(c.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const meta = [
+    c.owner ? `<b>Owner:</b> ${esc(c.owner)}` : null,
+    c.banker ? `<b>Banker:</b> ${esc(c.banker)}` : null,
+    reviewDate ? `<b>Next review:</b> ${reviewDate}` : null,
+  ].filter(Boolean).join('&nbsp;&nbsp;&nbsp;')
 
   return `
-    <div style="background: ${bg}; border: 1px solid ${border}; border-radius: 6px; padding: 14px 16px; margin-bottom: 10px;">
-      <p style="margin: 0 0 6px; font-size: 15px; font-weight: 600; color: #111;">${esc(c.company_name)}</p>
-
-      ${c.description ? `<p style="margin: 0 0 8px; color: #374151; font-size: 13px;">${esc(c.description)}</p>` : ''}
-
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #6b7280;">
-        <tr>
-          ${c.owner ? `<td style="padding: 2px 12px 2px 0;"><strong style="color: #374151;">Owner</strong><br>${esc(c.owner)}</td>` : ''}
-          ${c.banker ? `<td style="padding: 2px 12px 2px 0;"><strong style="color: #374151;">Banker</strong><br>${esc(c.banker)}</td>` : ''}
-          ${reviewDate ? `<td style="padding: 2px 0;"><strong style="color: #374151;">Next review</strong><br>${reviewDate}</td>` : ''}
-        </tr>
-      </table>
-
-      ${c.next_steps ? `
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.08);">
-          <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Next steps</span>
-          <p style="margin: 3px 0 0; font-size: 13px; color: #374151;">${esc(c.next_steps)}</p>
-        </div>` : ''}
-
-      <p style="margin: 8px 0 0; font-size: 11px; color: #9ca3af;">Updated ${updatedAt}</p>
-    </div>`
+    <tr>
+      <td style="padding:14px 16px;">
+        <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:#111111;font-family:Arial,sans-serif;">${esc(c.company_name)}</p>
+        ${c.description ? `<p style="margin:0 0 8px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">${esc(c.description)}</p>` : ''}
+        ${meta ? `<p style="margin:0 0 8px;font-size:12px;color:#6b7280;font-family:Arial,sans-serif;">${meta}</p>` : ''}
+        ${c.next_steps ? `
+        <p style="margin:0;font-size:12px;font-family:Arial,sans-serif;">
+          <span style="color:#6b7280;font-weight:bold;text-transform:uppercase;letter-spacing:0.04em;">Next steps:</span>
+          <span style="color:#374151;"> ${esc(c.next_steps)}</span>
+        </p>` : ''}
+      </td>
+    </tr>`
 }
 
 function esc(str: string): string {
