@@ -26,17 +26,19 @@ export async function sendWeeklyDigest() {
 
   const subject = `Weekly digest · ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
 
+  const appUrl = (process.env.APP_URL ?? '').replace(/\/$/, '')
+
   await resend.emails.send({
     from: process.env.REMINDER_FROM_EMAIL!,
     to: process.env.REMINDER_TO_EMAIL!,
     subject,
-    html: buildEmail(overdue, active, nearTerm),
+    html: buildEmail(overdue, active, nearTerm, appUrl),
   })
 
   return { sent: true, overdue: overdue.length, active: active.length, nearTerm: nearTerm.length }
 }
 
-function buildEmail(overdue: Company[], active: Company[], nearTerm: Company[]): string {
+function buildEmail(overdue: Company[], active: Company[], nearTerm: Company[], appUrl: string): string {
   const date = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   })
@@ -60,6 +62,7 @@ function buildEmail(overdue: Company[], active: Company[], nearTerm: Company[]):
           <td bgcolor="#111111" style="padding:20px 28px;">
             <p style="margin:0;color:#ffffff;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;">Company Tracker &middot; Weekly Digest</p>
             <p style="margin:4px 0 0;color:#9ca3af;font-size:13px;font-family:Arial,sans-serif;">${date}</p>
+            ${appUrl ? `<p style="margin:8px 0 0;font-size:13px;font-family:Arial,sans-serif;"><a href="${appUrl}" style="color:#93c5fd;text-decoration:underline;">Open dashboard &rarr;</a></p>` : ''}
           </td>
         </tr>
 
@@ -67,9 +70,9 @@ function buildEmail(overdue: Company[], active: Company[], nearTerm: Company[]):
         <tr>
           <td style="padding:28px;">
 
-            ${section('OVERDUE', overdue, '#b91c1c')}
-            ${section('ACTIVE', active, '#1d4ed8')}
-            ${section('MONITOR – NEAR TERM', nearTerm, '#92400e')}
+            ${section('OVERDUE', overdue, '#b91c1c', appUrl)}
+            ${section('ACTIVE', active, '#1d4ed8', appUrl)}
+            ${section('MONITOR – NEAR TERM', nearTerm, '#92400e', appUrl)}
 
             <p style="margin:24px 0 0;font-size:12px;color:#9ca3af;font-family:Arial,sans-serif;">
               Weekly digest from Company Tracker.
@@ -86,10 +89,10 @@ function buildEmail(overdue: Company[], active: Company[], nearTerm: Company[]):
 </html>`
 }
 
-function section(title: string, companies: Company[], color: string): string {
+function section(title: string, companies: Company[], color: string, appUrl: string): string {
   if (companies.length === 0) return ''
 
-  const rows = companies.map(companyBlock).join(`
+  const rows = companies.map(c => companyBlock(c, appUrl)).join(`
     <tr><td style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-bottom:1px solid #e5e7eb;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
   `)
 
@@ -117,7 +120,7 @@ function section(title: string, companies: Company[], color: string): string {
     </table>`
 }
 
-function companyBlock(c: Company): string {
+function companyBlock(c: Company, appUrl: string): string {
   const reviewDate = c.next_review_date
     ? new Date(c.next_review_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
@@ -131,7 +134,9 @@ function companyBlock(c: Company): string {
   return `
     <tr>
       <td style="padding:14px 16px;">
-        <p style="margin:0 0 4px;font-size:15px;font-weight:bold;color:#111111;font-family:Arial,sans-serif;">${esc(c.company_name)}</p>
+        <p style="margin:0 0 4px;font-size:15px;font-weight:bold;font-family:Arial,sans-serif;">
+          ${appUrl ? `<a href="${appUrl}/companies/${c.id}" style="color:#111111;text-decoration:underline;">${esc(c.company_name)}</a>` : esc(c.company_name)}
+        </p>
         ${c.description ? `<p style="margin:0 0 8px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">${esc(c.description)}</p>` : ''}
         ${meta ? `<p style="margin:0 0 8px;font-size:12px;color:#6b7280;font-family:Arial,sans-serif;">${meta}</p>` : ''}
         ${c.next_steps ? `
